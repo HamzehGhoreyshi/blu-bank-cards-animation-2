@@ -9,3 +9,44 @@ body,
   background: #ffffff;
   overflow: hidden;
 }
+
+/* Signature footer bar — same as the other experiments (Iran map, Blu wallet). */
+:root {
+  --ink: #16171a;
+  --blu: #4e91e6;
+}
+.credits-sig {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 52px;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 0 60px;
+  background: #fff;
+  border-top: 1px solid rgba(22, 23, 26, 0.08);
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  line-height: 1;
+  color: #8a8c92;
+  white-space: nowrap;
+}
+.credits-sig svg { display: block; flex: none; width: 13px; height: 13px; fill: var(--ink); }
+.credits-sig .star-icon { fill: #f3b53f; }
+.credits-sig a { display: inline-flex; align-items: center; gap: 6px; height: 20px; color: inherit; text-decoration: none; border-radius: 6px; transition: opacity 0.2s; }
+.credits-sig a:hover { opacity: 0.7; }
+.credits-sig a:focus-visible { outline: 2px solid var(--blu); outline-offset: 2px; }
+.credits-sig strong { color: var(--ink); font-weight: 600; }
+.credits-sig .dot { opacity: 0.5; }
+.credits-sig .sig-start { justify-self: start; }
+.credits-sig .sig-mid { justify-self: center; }
+.credits-sig .sig-end { justify-self: end; display: inline-flex; align-items: center; gap: 10px; height: 20px; }
+
+@media (max-width: 600px) {
+  .credits-sig { padding: 0 16px; grid-template-columns: auto 1fr; }
+  .credits-sig .sig-mid { display: none; }
+}
