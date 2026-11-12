@@ -303,9 +303,22 @@ export default function App() {
       }
 
       // Spacing gap between center card and adjacent cards
-      const gap = 36;
       const peekAmount = -55; // Push the card's edge 55px past the screen boundary to hide a premium portion of it!
       const D = 1350; // Perspective distance
+
+      // Even spacing, as seen on screen: the visible gap between neighbouring cards is
+      // the same everywhere. Each resting spot has its own depth (z) and turn, so its
+      // on-screen half-height differs: centre card (z 400, flat), next (z 220, turned
+      // 132° → 0.67 tall), next (z -60, turned 175° → nearly full height). Solve for
+      // one gap G so the card two places away just reaches past the screen edge;
+      // on short screens G never drops below 56 px.
+      const s0 = D / (D - 400), s1 = D / (D - 220), s2 = D / (D + 60);
+      const hh0 = (cardH / 2) * s0;
+      const hh1 = (cardH / 2) * Math.abs(Math.cos((132 * Math.PI) / 180)) * s1;
+      const hh2 = (cardH / 2) * Math.abs(Math.cos((175 * Math.PI) / 180)) * s2;
+      const G = Math.max(56, (h / 2 - peekAmount - hh0 - 2 * hh1 - 2 * hh2) / 2);
+      const Y1 = (hh0 + G + hh1) / s1; // resting spot of offset 1 (before perspective)
+      const Y2 = (hh0 + 2 * G + 2 * hh1 + hh2) / s2; // resting spot of offset 2
 
       let y = 0;
       let z = 0;
@@ -317,8 +330,7 @@ export default function App() {
         const easedT = t * t * (3 - 2 * t);
 
         // Y moves from 0 to (cardH + gap)
-        const targetY = cardH + gap;
-        y = -sign * (easedT * targetY);
+        y = -sign * (easedT * Y1);
 
         // Z moves from 400 (center) to 220 (adjacent)
         z = 400 + easedT * (220 - 400);
@@ -330,7 +342,7 @@ export default function App() {
         const t = absOffset - 1;
         const easedT = t * t * (3 - 2 * t);
 
-        const yStart = cardH + gap;
+        const yStart = Y1;
         const zStart = 220;
         const rotStart = 132;
 
@@ -339,7 +351,8 @@ export default function App() {
 
         // Perspective-aware formula for exact edge alignment at the screen boundary (peekAmount = 26px inside)
         const sEnd = D / (D - zEnd);
-        const yEnd = (h / 2 - peekAmount) / sEnd - (cardH / 2);
+        void sEnd;
+        const yEnd = Y2;
 
         const currentY = yStart + easedT * (yEnd - yStart);
         y = -sign * currentY;
@@ -358,11 +371,13 @@ export default function App() {
         const rotEnd3 = 195;
 
         const sEnd2 = D / (D - zStart);
-        const yEnd2 = (h / 2 - peekAmount) / sEnd2 - (cardH / 2);
+        void sEnd2;
+        const yEnd2 = Y2;
 
         // Calculate yEnd3 dynamically so that the card's edge is completely 100px past the screen boundary
         const sEnd3 = D / (D - zEnd3);
-        const yEnd3 = (h / 2 + 100) / sEnd3 + (cardH / 2);
+        // fully off-screen, and at least one more even step out
+        const yEnd3 = Math.max((h / 2 + 100) / sEnd3 + cardH / 2, Y2 + (Y2 - Y1));
 
         const currentY = yEnd2 + easedT * (yEnd3 - yEnd2);
         y = -sign * currentY;
