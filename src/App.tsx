@@ -135,7 +135,7 @@ export default function App() {
   // Continuous scroll progress
   const progress = useRef<number>(0);
 
-  // Click → glide to the next card with a slow, eased move (1.6 s), then the auto flow resumes.
+  // Click → glide to the next card with a slow, eased move (1.6 s), then rest there.
   // Clicking again mid-glide extends it by one more card.
   const JUMP_MS = 1600;
   const jump = useRef<{ from: number; to: number; start: number } | null>(null);
@@ -249,8 +249,7 @@ export default function App() {
 
   // Compute positions, rotations, and visual rules at 60fps
   const renderLoop = () => {
-    // Auto flow, ~35% faster than the original (0.0016 → 0.0022).
-    if (!jump.current) progress.current += 0.0022;
+    // No auto flow: the cards rest on the current card and only move when clicked.
 
     // Smoothly interpolate current mouse variables towards their target positions (damping/inertia logic)
     mouse.current.x += (mouse.current.targetX - mouse.current.x) * 0.08;
@@ -267,7 +266,7 @@ export default function App() {
       const e = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
       virtualActiveIndex = jump.current.from + (jump.current.to - jump.current.from) * e;
       if (t >= 1) {
-        progress.current = jump.current.to; // hand back to the auto flow, resting on this card
+        progress.current = jump.current.to; // rest on this card until the next click
         jump.current = null;
       }
     } else {
