@@ -5,10 +5,10 @@ A 3D carousel of the seven Blu Junior card designs. Click anywhere to glide to t
 **Live:** https://blu-bank-cards-animation-2.vercel.app
 
 <p align="center">
-  <a href="https://blu-bank-cards-animation-2.vercel.app"><img src="docs/demo.gif" alt="A mouse tilts the Blu Junior card and clicks through the carousel; each click glides to the next card with a burst of confetti" width="560"></a>
+  <a href="https://blu-bank-cards-animation-2.vercel.app"><img src="docs/demo.gif" alt="A mouse clicks through the Blu Junior cards; each click glides to the next card with a burst of confetti" width="560"></a>
 </p>
 
-▶️ Full-quality video (1920×1080, 60 fps): [docs/demo.mp4](docs/demo.mp4)
+▶️ Full-quality video (1920×1080, 60 fps, loops): [docs/demo.mp4](docs/demo.mp4)
 
 - **Front:** the official Blu Junior artwork.
 - **Back:** modelled on a real Saman Bank card — colour taken from each design, brushed magnetic stripe, a random Persian name, card number (valid Luhn check digit), expiry and CVV2 on every load, "Powered by Saman Bank".
@@ -24,12 +24,12 @@ npm run dev
 
 ## Record the demo video
 
-Filmed frame by frame on a virtual clock (no dropped frames), with real mouse moves and clicks and a drawn macOS cursor:
+Filmed frame by frame on a virtual clock (no dropped frames): the macOS pointing-hand cursor rests on the card and clicks through all seven cards with real clicks, ending where it started so the video loops.
 
 ```bash
 npm i --no-save puppeteer-core
 npm run build
-node tools/record.mjs docs/demo.mp4          # 1280×720 page → 1920×1080 video
+node tools/record.mjs demo-4k.mp4            # 1280×720 page → 3840×2160 video
 ```
 
 Needs Google Chrome and ffmpeg.
