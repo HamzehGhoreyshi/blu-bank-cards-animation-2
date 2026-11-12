@@ -413,10 +413,53 @@ export default function App() {
     return () => cancelAnimationFrame(frameId.current);
   }, [metrics]);
 
-  // Card body: 7 slices across 4.4 px give a solid, visible edge when a card turns.
-  // Outer slices are a darker shade of the card colour, the middle one a light core,
-  // like the laminated layers of a real plastic card.
-  const thicknessLayers = [-2.2, -1.47, -0.73, 0, 0.73, 1.47, 2.2];
+  // Card body = clear glass, like the v1 wallet cards: 9 translucent slices across 7.2 px
+  // build a thick glass edge that catches the light when a card turns. The printed
+  // artwork sits inside, inset by RIM, so a clear glass border shows all around it.
+  const thicknessLayers = [-3.6, -2.7, -1.8, -0.9, 0, 0.9, 1.8, 2.7, 3.6];
+  const RIM = Math.max(4, Math.round(metrics.cardW * 0.022)); // clear glass border width (px)
+  const R = 16; // outer corner radius
+  const glassFace: React.CSSProperties = {
+    // clear glass: mostly see-through, brighter towards the lit top-left corner
+    backgroundImage:
+      'linear-gradient(145deg, rgba(255,255,255,0.7) 0%, rgba(222,234,250,0.22) 28%, rgba(255,255,255,0.06) 58%, rgba(214,229,250,0.4) 100%)',
+    border: '1px solid rgba(255,255,255,0.95)',
+    boxShadow: [
+      '0 24px 40px -18px rgba(40, 46, 80, 0.42)', // soft drop shadow
+      '0 6px 14px -8px rgba(40, 46, 80, 0.25)',
+      'inset 0 0 0 1px rgba(140, 168, 214, 0.35)', // faint blue glass line inside the edge
+      'inset 0 1.5px 2px rgba(255,255,255,0.95)', // bright bevel on the top edge
+      'inset 0 -1.5px 2px rgba(120, 140, 180, 0.25)',
+    ].join(', '),
+  };
+  const printBox: React.CSSProperties = {
+    position: 'absolute',
+    inset: `${RIM}px`,
+    borderRadius: `${R - RIM * 0.55}px`,
+    overflow: 'hidden',
+    // the printed sheet sits slightly inside the glass
+    boxShadow: '0 0 0 0.5px rgba(30, 34, 60, 0.18), 0 1px 3px rgba(30, 34, 60, 0.18)',
+  };
+
+  // Light passing through the clear border picks up the print's colours:
+  // a soft, blurred copy of the face sits under the glass, behind the print.
+  const GlassTint = ({ src, color }: { src?: string; color: string }) => (
+    <div className="absolute inset-0 overflow-hidden" style={{ borderRadius: `${R}px` }}>
+      <div
+        className="absolute"
+        style={{
+          inset: `${RIM * 0.4}px`,
+          borderRadius: `${R}px`,
+          backgroundColor: color,
+          backgroundImage: src ? `url(${src})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          filter: `blur(${RIM * 0.9}px) saturate(1.3)`,
+          opacity: 0.55,
+        }}
+      />
+    </div>
+  );
 
   // Shared overlays that make each face feel physical: lighting, gloss, bevelled rim.
   const Surface = () => (
@@ -428,18 +471,10 @@ export default function App() {
         className="absolute inset-0 rounded-[16px]"
         style={{
           backgroundImage:
-            'linear-gradient(115deg, rgba(255,255,255,0) 38%, rgba(255,255,255,0.55) 49%, rgba(255,255,255,0.12) 53%, rgba(255,255,255,0) 62%)',
+            'linear-gradient(115deg, rgba(255,255,255,0) 36%, rgba(255,255,255,0.65) 48%, rgba(255,255,255,0.15) 53%, rgba(255,255,255,0) 63%)',
           backgroundSize: '300% 300%',
           backgroundPosition: 'var(--gx, 50%) 50%',
           mixBlendMode: 'overlay',
-        }}
-      />
-      {/* bevelled rim: light top edge, darker bottom edge, thin glass outline */}
-      <div
-        className="absolute inset-0 rounded-[16px]"
-        style={{
-          boxShadow:
-            'inset 0 0 0 1px rgba(255,255,255,0.28), inset 0 1.5px 0 rgba(255,255,255,0.55), inset 0 -1.5px 0 rgba(0,0,0,0.25), inset 0 0 14px rgba(255,255,255,0.08)',
         }}
       />
     </>
@@ -447,8 +482,9 @@ export default function App() {
 
   return (
     <div
-      className="absolute inset-0 bg-white text-neutral-900 flex items-center justify-center overflow-hidden select-none cursor-pointer"
+      className="absolute inset-0 text-neutral-900 flex items-center justify-center overflow-hidden select-none cursor-pointer"
       onClick={handleClick}
+      style={{ background: 'radial-gradient(120% 90% at 50% 40%, #FCFCFD 0%, #F1F2F4 55%, #E4E5E9 100%)' }}
     >
       <Particles />
 
@@ -487,45 +523,47 @@ export default function App() {
 
                 const imageSrc = CARD_IMAGES[i];
                 const back = { ...CARD_BACKS[i % CARD_BACKS.length], ...holders[i] };
-                const softShadow = '0 22px 38px -16px rgba(40, 36, 80, 0.45), 0 6px 12px -6px rgba(40, 36, 80, 0.25)';
 
-                // Edge slices
+                // Edge slices: translucent glass; the outermost ones carry a bright outline
                 if (!isFrontFace && !isBackFace) {
-                  const core = zOffset === 0;
+                  const outer = Math.abs(zOffset) > 3;
                   return (
                     <div
                       key={layerIdx}
-                      className="absolute inset-0 rounded-[16px] pointer-events-none"
+                      className="absolute inset-0 pointer-events-none"
                       style={{
-                        backgroundColor: core
-                          ? `color-mix(in srgb, ${back.color} 45%, white)`
-                          : `color-mix(in srgb, ${back.color} 70%, black)`,
+                        borderRadius: `${R}px`,
+                        backgroundColor: 'rgba(226, 236, 252, 0.34)',
+                        border: `1px solid rgba(255,255,255,${outer ? 0.9 : 0.55})`,
                         transform: `translateZ(${zOffset}px)`,
                       }}
                     />
                   );
                 }
 
-                // Front face: the Blu Junior artwork (it carries its own chip and logo)
+                // Front face: glass body with the Blu Junior artwork set inside
                 if (isFrontFace) {
                   return (
                     <div
                       key={layerIdx}
-                      className="absolute inset-0 rounded-[16px] pointer-events-none overflow-hidden"
+                      className="absolute inset-0 pointer-events-none"
                       style={{
-                        backgroundColor: back.color,
+                        ...glassFace,
+                        borderRadius: `${R}px`,
                         transform: `translateZ(${zOffset}px)`,
                         backfaceVisibility: 'hidden',
-                        boxShadow: softShadow,
                       }}
                     >
-                      <img
-                        src={imageSrc}
-                        alt=""
-                        draggable={false}
-                        className="absolute inset-0 w-full h-full object-cover rounded-[16px]"
-                        style={{ transform: 'scale(1.012)' }}
-                      />
+                      <GlassTint src={imageSrc} color={back.color} />
+                      <div style={printBox}>
+                        <img
+                          src={imageSrc}
+                          alt=""
+                          draggable={false}
+                          className="absolute inset-0 w-full h-full object-cover"
+                          style={{ transform: 'scale(1.02)' }}
+                        />
+                      </div>
                       <Surface />
                     </div>
                   );
@@ -535,28 +573,32 @@ export default function App() {
                 if (isBackFace) {
                   // Designed portrait (like the real card), then turned the same quarter
                   // turn as the front artwork: portrait top → the card's left edge.
-                  const pw = metrics.cardH; // portrait width
-                  const ph = metrics.cardW; // portrait height
+                  const iw = metrics.cardW - RIM * 2; // printed area inside the glass
+                  const ih = metrics.cardH - RIM * 2;
+                  const pw = ih; // portrait width
+                  const ph = iw; // portrait height
                   const u = pw / 100; // 1 unit = 1% of portrait width
                   const v = ph / 100; // 1 unit = 1% of portrait height
                   return (
                     <div
                       key={layerIdx}
-                      className="absolute inset-0 rounded-[16px] pointer-events-none overflow-hidden"
+                      className="absolute inset-0 pointer-events-none"
                       style={{
-                        backgroundColor: back.color,
+                        ...glassFace,
+                        borderRadius: `${R}px`,
                         transform: `translateZ(${zOffset}px) rotateX(180deg)`,
                         backfaceVisibility: 'hidden',
-                        boxShadow: softShadow,
                       }}
                     >
+                      <GlassTint color={back.color} />
+                      <div style={{ ...printBox, backgroundColor: back.color }}>
                       <div
                         className="absolute"
                         style={{
                           width: `${pw}px`,
                           height: `${ph}px`,
-                          left: `${(metrics.cardW - pw) / 2}px`,
-                          top: `${(metrics.cardH - ph) / 2}px`,
+                          left: `${(iw - pw) / 2}px`,
+                          top: `${(ih - ph) / 2}px`,
                           transform: 'rotate(-90deg)',
                           color: back.ink,
                           fontFamily: '"Montserrat", system-ui, sans-serif',
@@ -661,6 +703,7 @@ export default function App() {
                           </span>
                           <SamanMark ink={back.ink} wordW={22 * u} flowerW={7 * u} gap={1.5 * u} />
                         </div>
+                      </div>
                       </div>
                       <Surface />
                     </div>
