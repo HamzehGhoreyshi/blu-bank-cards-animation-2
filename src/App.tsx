@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import Particles from './Particles';
 import { CARDS, CardFront, CardBack, randomHolder } from './cards';
 
 export default function App() {
@@ -342,7 +341,6 @@ export default function App() {
       className="absolute inset-0 bg-white text-neutral-900 flex items-center justify-center overflow-hidden select-none cursor-pointer"
       onClick={handleClick}
     >
-      <Particles />
 
       {/* 3D perspective camera space */}
       <div
