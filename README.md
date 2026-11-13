@@ -4,9 +4,7 @@ A horizontal 3D carousel of the seven Blu Junior card designs, standing upright 
 
 **Live:** https://blu-bank-cards-animation-2.vercel.app
 
-<p align="center">
-  <a href="https://blu-bank-cards-animation-2.vercel.app"><img src="docs/demo.gif" alt="A mouse clicks through the Blu Junior cards; each click glides to the next card with a burst of confetti" width="600"></a>
-</p>
+<a href="https://blu-bank-cards-animation-2.vercel.app"><img src="docs/demo.gif" alt="A mouse clicks through the Blu Junior cards; each click glides to the next card with a burst of confetti" width="100%"></a>
 
 ▶️ Full-quality video (1920×1080, 60 fps, loops): [docs/demo.mp4](docs/demo.mp4)
 
