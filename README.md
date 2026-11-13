@@ -1,11 +1,11 @@
 # Blu Junior Cards — 3D carousel
 
-A 3D carousel of the seven Blu Junior card designs. Click anywhere to glide to the next card; move the mouse to tilt it.
+A horizontal 3D carousel of the seven Blu Junior card designs, standing upright like real cards. Click anywhere to glide to the next card (it rolls in from the right); move the mouse to tilt it.
 
 **Live:** https://blu-bank-cards-animation-2.vercel.app
 
 <p align="center">
-  <a href="https://blu-bank-cards-animation-2.vercel.app"><img src="docs/demo.gif" alt="A mouse clicks through the Blu Junior cards; each click glides to the next card with a burst of confetti" width="560"></a>
+  <a href="https://blu-bank-cards-animation-2.vercel.app"><img src="docs/demo.gif" alt="A mouse clicks through the Blu Junior cards; each click glides to the next card with a burst of confetti" width="600"></a>
 </p>
 
 ▶️ Full-quality video (1920×1080, 60 fps, loops): [docs/demo.mp4](docs/demo.mp4)
