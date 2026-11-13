@@ -1,18 +1,19 @@
-# Premium Cards — 3D carousel
+# Blu Junior Cards — 3D carousel
 
-A 3D carousel of seven of the world's most premium metal cards: Apple Card, X Money, American Express Centurion and Platinum, J.P. Morgan Reserve, Chase Sapphire Reserve and the Luxury Card Gold Card. Click anywhere to glide to the next card; move the mouse to tilt it.
+A 3D carousel of the seven Blu Junior card designs. Click anywhere to glide to the next card; move the mouse to tilt it.
 
 **Live:** https://blu-bank-cards-animation-2.vercel.app
 
 <p align="center">
-  <a href="https://blu-bank-cards-animation-2.vercel.app"><img src="docs/demo.gif" alt="A mouse clicks through the cards; each click glides to the next card" width="560"></a>
+  <a href="https://blu-bank-cards-animation-2.vercel.app"><img src="docs/demo.gif" alt="A mouse clicks through the Blu Junior cards; each click glides to the next card with a burst of confetti" width="560"></a>
 </p>
 
-▶️ Full-quality video (1920×1080, 60 fps, loops): [docs/demo.mp4](docs/demo.mp4) — recorded with the earlier Blu Junior designs.
+▶️ Full-quality video (1920×1080, 60 fps, loops): [docs/demo.mp4](docs/demo.mp4)
 
-- **Front:** drawn in code, no image files — brushed metal, laser-etched wordmark (a simple nod to each brand's logo), gold chip, contactless mark, holder name, one-colour Visa or Mastercard mark. No number on the front, like real premium cards.
-- **Back:** magnetic stripe, etched card number (Visa 4… / Mastercard 51–55… / Amex 34 or 37, valid Luhn check digit), expiry, CVV and holder name — random on every load.
+- **Front:** the official Blu Junior artwork.
+- **Back:** modelled on a real Saman Bank card — colour taken from each design, brushed magnetic stripe, a random Persian name, card number (valid Luhn check digit), expiry and CVV2 on every load, "Powered by Saman Bank".
 - **3D:** layered card edge, moving gloss, light shading and soft shadows — pure CSS 3D transforms, no 3D library.
+- **Extras:** light floating particles and a confetti burst on click.
 
 ## Run it
 
@@ -37,11 +38,11 @@ Needs Google Chrome and ffmpeg.
 
 Vite · React 18 · TypeScript · Tailwind CSS v4 · `requestAnimationFrame` (no animation libraries).
 
-- `src/App.tsx` — carousel motion, 3D card body and lighting
-- `src/cards.tsx` — the seven card designs, front and back faces, random holder data
+- `src/App.tsx` — carousel motion, card faces, card back layout, random holder data
+- `src/Particles.tsx` — background particles and click confetti (one canvas)
 
 ## Credits
 
-Brand names, logos and card products belong to their owners; the designs here are loose, non-commercial concept versions, not the real cards. All card details are randomly generated and not real.
+Card artwork and the blu and Saman Bank logos belong to their owners; used here for a non-commercial design concept. All card details are randomly generated and not real.
 
 Design experiment by [Hamzeh](https://hamzeh.framer.ai/?utm_source=blu-bank-cards-animation-2&utm_medium=referral) · Built with Claude.

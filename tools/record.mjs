@@ -2,7 +2,7 @@
 // through all 7 cards (ending back on the first, so the video loops).
 //
 // Frame by frame: the page's clock is replaced, so every frame is exactly 1/60 s after the
-// last and nothing ever drops. Clicks are real clicks sent to Chrome (the glide).
+// last and nothing ever drops. Clicks are real clicks sent to Chrome (glide + confetti).
 // Headless Chrome films no system cursor, so the system's own cursor image is drawn on top
 // (tools/assets/pointinghand.png, rendered from macOS's cursor.pdf, hotspot 12,8, its shadow).
 //
@@ -97,11 +97,11 @@ const HOT = { x: 12, y: 8 }; // macOS hotspot for the pointing hand
 const step = () => page.evaluate((ms) => window.__step(ms), 1000 / FPS);
 await page.evaluate(() => document.fonts.ready);
 await page.evaluate(() => Promise.all([...document.images].map((i) => i.decode().catch(() => {}))));
-for (let i = 0; i < FPS * 1.5; i++) await step(); // settle: first card resting
+for (let i = 0; i < FPS * 1.5; i++) await step(); // settle: particles spread, first card resting
 
 // ---------- the plan: the hand rests on the card and clicks 7 times ----------
 const W2 = W / 2, H2 = H / 2;
-const spot = { x: W2 + 35, y: H2 }; // the empty middle of the front card, clear of logo, chip and network mark
+const spot = { x: W2 + 70, y: H2 + 35 }; // on the front card, clear of the blu logo
 const CARDS = 7;
 const BEFORE = 0.6; // s before the first click
 const EACH = 2.1; // s per card: 1.6 s glide + a short look
@@ -126,7 +126,7 @@ for (let i = 0; i < FPS; i++) await step(); // let the tilt settle under the res
 for (let f = 0; f < total; f++) {
   if (clickFrames.has(f)) {
     await page.mouse.down();
-    await page.mouse.up(); // a real click: the page glides to the next card
+    await page.mouse.up(); // a real click: the page glides and throws confetti
   }
   await step();
   const { data } = await cdp.send('Page.captureScreenshot', { format: 'png', optimizeForSpeed: true, captureBeyondViewport: false, clip: { x: 0, y: 0, width: W, height: H, scale: SCALE } });
