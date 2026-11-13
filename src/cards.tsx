@@ -1,6 +1,6 @@
 import React from 'react';
 
-// Seven of the most premium cards in the world, drawn in code (no image files):
+// Nine of the most premium cards in the world, drawn in code (no image files):
 // brushed metal, laser-etched type, no number on the front. Logos are simple
 // geometric nods to each brand, not copies of the official artwork.
 // `color` is the card body (also used for the edge), `ink` the etched text colour.
@@ -35,14 +35,228 @@ const brushed = (strength: number) =>
 
 // ---------- logo motifs ----------
 
+// Outlined apple, engraved into the metal (no wordmark, like the real card).
 function AppleLogo({ u, ink }: { u: number; ink: string }) {
   return (
-    <div className="flex items-center" style={{ gap: 1.2 * u }}>
-      <svg width={6.4 * u} height={7.6 * u} viewBox="0 0 84 100" fill={ink}>
-        <path d="M42 30 C33 22 14 23 8 44 C2 66 18 94 31 95 C37 95 39 92 42 92 C45 92 48 95 54 95 C64 94 74 80 79 69 C68 64 64 51 72 41 C67 33 59 28 51 30 C47 31 45 32 42 30 Z" />
-        <path d="M44 24 C44 13 53 4 62 3 C62 14 53 23 44 24 Z" />
+    <svg width={8.4 * u} height={10 * u} viewBox="0 0 84 100" fill="none" stroke={ink} strokeWidth="2.6" strokeLinejoin="round">
+      <path d="M42 30 C33 22 14 23 8 44 C2 66 18 94 31 95 C37 95 39 92 42 92 C45 92 48 95 54 95 C64 94 74 80 79 69 C68 64 64 51 72 41 C67 33 59 28 51 30 C47 31 45 32 42 30 Z" />
+      <path d="M44 24 C44 13 53 4 62 3 C62 14 53 23 44 24 Z" />
+    </svg>
+  );
+}
+
+// Silver six-pad chip of the Apple Card.
+function SilverChip({ u }: { u: number }) {
+  return (
+    <svg width={12 * u} height={9.4 * u} viewBox="0 0 48 37">
+      <defs>
+        <linearGradient id="chipSilver" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#F4F4F6" />
+          <stop offset="0.5" stopColor="#C9CBD0" />
+          <stop offset="1" stopColor="#E6E7EA" />
+        </linearGradient>
+      </defs>
+      {[0, 1, 2].map((r) =>
+        [0, 1].map((c) => (
+          <rect
+            key={`${r}${c}`}
+            x={1 + c * 24}
+            y={1 + r * 12}
+            width="22"
+            height="10.5"
+            rx="5.2"
+            fill="url(#chipSilver)"
+            stroke="#A9ACB2"
+            strokeWidth="0.8"
+          />
+        )),
+      )}
+    </svg>
+  );
+}
+
+// X card (matched to the photo): one huge X pressed into matte black metal. The
+// thick stroke is hollow (outline + inner cut-out), it runs the full height and
+// bleeds off the bottom edge. Silver chip top-left, wide techy name top-right.
+const X_PATH =
+  'M714 519L1161 0H1055L667 451L357 0H0L468 682L0 1226H106L515 750L843 1226H1200L714 519ZM569 688L522 620L144 80H307L611 516L659 584L1055 1150H892L569 688Z';
+
+function XFront({ card, holder, u }: { card: PremiumCard; holder: string; u: number }) {
+  const h = 63 * u; // X height ≈ card height, so it bleeds off the bottom
+  const w = (h * 1200) / 1227;
+  const box = { left: 25 * u, top: 5 * u, width: w, height: h };
+  return (
+    <div className="absolute inset-0" style={{ background: card.bg }}>
+      {/* shadow side of the pressing (down-right) */}
+      <svg className="absolute" style={{ ...box, transform: `translate(${0.35 * u}px, ${0.45 * u}px)` }} viewBox="0 0 1200 1227">
+        <path d={X_PATH} fillRule="evenodd" fill="rgba(0,0,0,0.85)" />
       </svg>
-      <span style={{ fontFamily: sans, fontWeight: 500, fontSize: 5.6 * u, letterSpacing: '0.01em', color: ink }}>Card</span>
+      {/* lit side of the pressing (up-left) */}
+      <svg className="absolute" style={{ ...box, transform: `translate(${-0.25 * u}px, ${-0.25 * u}px)` }} viewBox="0 0 1200 1227">
+        <path d={X_PATH} fillRule="evenodd" fill="rgba(255,255,255,0.22)" />
+      </svg>
+      {/* the X face: a touch glossier than the matte card */}
+      <svg className="absolute" style={box} viewBox="0 0 1200 1227">
+        <defs>
+          <linearGradient id="xFace" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stopColor="#1D1D20" />
+            <stop offset="0.5" stopColor="#111113" />
+            <stop offset="1" stopColor="#0B0B0C" />
+          </linearGradient>
+        </defs>
+        <path d={X_PATH} fillRule="evenodd" fill="url(#xFace)" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
+      </svg>
+
+      <div className="absolute" style={{ left: 8 * u, top: 6 * u }}>
+        <Chip u={u} silver />
+      </div>
+      <div
+        className="absolute whitespace-nowrap"
+        style={{
+          right: 6 * u,
+          top: 8.6 * u,
+          fontFamily: '"Michroma", "Montserrat", sans-serif',
+          fontSize: 2.9 * u,
+          fontWeight: 400,
+          lineHeight: 1,
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase',
+          color: '#E9E9EC',
+          textShadow: '0 0 1px rgba(255,255,255,0.25)',
+        }}
+      >
+        {holder}
+      </div>
+    </div>
+  );
+}
+
+// Visa Platinum: brushed gunmetal, silver chip on the left, name bottom-left,
+// a silver VISA with "Platinum" under it bottom-right. No issuer logo.
+function VisaPlatinumFront({ card, holder, u }: { card: PremiumCard; holder: string; u: number }) {
+  return (
+    <div className="absolute inset-0" style={{ background: card.bg }}>
+      <div className="absolute" style={{ left: 11 * u, top: 25 * u }}>
+        <Chip u={u} silver />
+      </div>
+      <div
+        className="absolute whitespace-nowrap"
+        style={{
+          left: 11 * u,
+          bottom: 12 * u,
+          fontFamily: sans,
+          fontSize: 3.6 * u,
+          fontWeight: 400,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+          color: '#D6D8DC',
+          textShadow: '0 -1px 0 rgba(0,0,0,0.7)',
+        }}
+      >
+        {holder}
+      </div>
+      <div className="absolute flex flex-col items-end" style={{ right: 6 * u, bottom: 5.5 * u }}>
+        <span
+          style={{
+            fontFamily: sans,
+            fontWeight: 800,
+            fontStyle: 'italic',
+            fontSize: 9 * u,
+            lineHeight: 1,
+            letterSpacing: '-0.02em',
+            backgroundImage: 'linear-gradient(180deg, #FFFFFF 0%, #DADCE0 50%, #A9ACB2 100%)',
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            color: 'transparent',
+            filter: 'drop-shadow(0 1px 0 rgba(0,0,0,0.5))',
+          }}
+        >
+          VISA
+        </span>
+        <span style={{ fontFamily: sans, fontSize: 3.4 * u, fontWeight: 500, color: '#E4E5E8', marginTop: 0.4 * u }}>Platinum</span>
+      </div>
+    </div>
+  );
+}
+
+// Mastercard World Elite: spun gunmetal, silver six-pad chip, "world elite" in
+// spaced lower case, a silver interlocking-circles mark with "mastercard" under it.
+function WorldEliteFront({ card, holder, u }: { card: PremiumCard; holder: string; u: number }) {
+  void holder;
+  return (
+    <div className="absolute inset-0" style={{ background: card.bg }}>
+      <div className="absolute" style={{ left: 11 * u, top: 20 * u, filter: 'brightness(0.78) contrast(1.15)' }}>
+        <SilverChip u={u} />
+      </div>
+      <div
+        className="absolute whitespace-nowrap"
+        style={{
+          left: 11 * u,
+          top: 45 * u,
+          fontFamily: sans,
+          fontSize: 3.4 * u,
+          fontWeight: 400,
+          letterSpacing: '0.2em',
+          color: '#C9CBCF',
+          textShadow: '0 -1px 0 rgba(0,0,0,0.6)',
+        }}
+      >
+        world elite
+      </div>
+      <div className="absolute flex flex-col items-center" style={{ right: 6 * u, bottom: 4.5 * u }}>
+        <svg width={18 * u} height={11.25 * u} viewBox="0 0 48 30">
+          <defs>
+            <radialGradient id="mcSilverA" cx="0.35" cy="0.3" r="0.8">
+              <stop offset="0" stopColor="#FFFFFF" />
+              <stop offset="0.6" stopColor="#C5C7CC" />
+              <stop offset="1" stopColor="#8C8F95" />
+            </radialGradient>
+            <radialGradient id="mcSilverB" cx="0.65" cy="0.3" r="0.8">
+              <stop offset="0" stopColor="#F4F4F6" />
+              <stop offset="0.6" stopColor="#B4B7BC" />
+              <stop offset="1" stopColor="#7E8187" />
+            </radialGradient>
+            <clipPath id="mcLeft">
+              <circle cx="17" cy="15" r="13.2" />
+            </clipPath>
+          </defs>
+          <circle cx="17" cy="15" r="13.2" fill="url(#mcSilverA)" />
+          <circle cx="31" cy="15" r="13.2" fill="url(#mcSilverB)" />
+          <circle cx="31" cy="15" r="13.2" fill="#5F6268" clipPath="url(#mcLeft)" />
+        </svg>
+        <span style={{ fontFamily: sans, fontSize: 3.4 * u, fontWeight: 500, color: '#E6E7EA', marginTop: 0.4 * u, letterSpacing: '0.01em' }}>
+          mastercard
+        </span>
+      </div>
+    </div>
+  );
+}
+
+// The Apple Card front is almost empty: apple, name, chip — nothing else.
+function AppleFront({ card, holder, u }: { card: PremiumCard; holder: string; u: number }) {
+  return (
+    <div className="absolute inset-0" style={{ background: card.bg }}>
+      <div className="absolute" style={{ left: 8.5 * u, top: 8 * u, filter: 'drop-shadow(0 0.6px 0 rgba(255,255,255,0.9))' }}>
+        <AppleLogo u={u} ink="#A3A5AB" />
+      </div>
+      <div
+        className="absolute whitespace-nowrap"
+        style={{
+          left: 8.5 * u,
+          top: 33 * u,
+          fontFamily: '-apple-system, "SF Pro Text", "Helvetica Neue", "Inter", Arial, sans-serif',
+          fontSize: 5 * u,
+          fontWeight: 500,
+          letterSpacing: '0.01em',
+          color: '#6E7076',
+          textShadow: '0 1px 0 rgba(255,255,255,0.9)',
+        }}
+      >
+        {holder}
+      </div>
+      <div className="absolute" style={{ right: 13 * u, top: 37 * u }}>
+        <SilverChip u={u} />
+      </div>
     </div>
   );
 }
@@ -140,9 +354,10 @@ export const CARDS: PremiumCard[] = [
     brand: 'Apple Card',
     tier: '',
     network: 'mastercard',
-    color: '#E9EAEE',
-    ink: '#A4A7AE',
-    bg: `${brushed(0.05)}, linear-gradient(115deg, rgba(255,255,255,0) 30%, rgba(255,255,255,0.85) 46%, rgba(255,255,255,0) 62%), linear-gradient(135deg, #FDFDFE 0%, #ECEDF1 50%, #DADCE1 100%)`,
+    color: '#E6E7EA',
+    ink: '#8E9097',
+    // smooth white titanium: no brush lines, only a soft sheen
+    bg: 'linear-gradient(115deg, rgba(255,255,255,0) 35%, rgba(255,255,255,0.7) 50%, rgba(255,255,255,0) 65%), linear-gradient(135deg, #FFFFFF 0%, #F6F6F8 55%, #ECEDF0 100%)',
     Logo: AppleLogo,
   },
   {
@@ -151,7 +366,28 @@ export const CARDS: PremiumCard[] = [
     network: 'visa',
     color: '#141416',
     ink: '#E8E8EA',
-    bg: `${brushed(0.025)}, radial-gradient(120% 90% at 80% 0%, rgba(255,255,255,0.12), rgba(255,255,255,0) 55%), linear-gradient(135deg, #070708 0%, #1C1C1F 55%, #0B0B0C 100%)`,
+    // matte black: a soft lift of light top-right, fine grain, darker lower-left
+    bg: 'repeating-radial-gradient(circle at 37% 61%, rgba(255,255,255,0.018) 0 0.5px, rgba(0,0,0,0) 0.5px 1.7px), repeating-radial-gradient(circle at 73% 29%, rgba(0,0,0,0.12) 0 0.5px, rgba(0,0,0,0) 0.5px 2.3px), radial-gradient(110% 120% at 85% 0%, #2A2A2D 0%, #18181A 45%, #0D0D0E 100%)',
+    Logo: XLogo,
+  },
+  {
+    brand: 'Visa Platinum',
+    tier: '',
+    network: 'visa',
+    color: '#1E1F22',
+    ink: '#D6D8DC',
+    // horizontally brushed gunmetal with a bright streak of light across the top
+    bg: 'radial-gradient(60% 45% at 52% 0%, rgba(255,255,255,0.32), rgba(255,255,255,0) 100%), repeating-linear-gradient(0deg, rgba(255,255,255,0.05) 0 1px, rgba(0,0,0,0.18) 1px 2px, rgba(255,255,255,0.02) 2px 3px, rgba(0,0,0,0) 3px 5px), repeating-linear-gradient(0deg, rgba(255,255,255,0) 0 13px, rgba(255,255,255,0.035) 13px 14px, rgba(255,255,255,0) 14px 29px), linear-gradient(180deg, #3A3C40 0%, #1C1D20 45%, #141517 100%)',
+    Logo: XLogo,
+  },
+  {
+    brand: 'Mastercard World Elite',
+    tier: '',
+    network: 'mastercard',
+    color: '#2A2B2E',
+    ink: '#CFD1D5',
+    // spun metal: fine circular grain from the centre, light caught in a cross of four lobes
+    bg: 'repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,0.05) 0 1px, rgba(0,0,0,0.12) 1px 2px, rgba(0,0,0,0) 2px 3px), conic-gradient(from 20deg at 50% 50%, #1B1C1F 0deg, #8E9096 40deg, #2A2B2F 85deg, #1A1B1E 135deg, #7A7C82 215deg, #26272A 265deg, #1B1C1F 360deg)',
     Logo: XLogo,
   },
   {
@@ -204,22 +440,23 @@ export const CARDS: PremiumCard[] = [
   },
 ];
 
-const isDark = (c: PremiumCard) => ['#141416', '#1A1A1C', '#13243F'].includes(c.color);
+const isDark = (c: PremiumCard) => ['#141416', '#1A1A1C', '#13243F', '#1E1F22', '#2A2B2E'].includes(c.color);
 
 // ---------- shared card parts ----------
 
-export function Chip({ u }: { u: number }) {
+export function Chip({ u, silver = false }: { u: number; silver?: boolean }) {
+  const id = silver ? 'chipSilverEmv' : 'chipGold';
   return (
     <svg width={11 * u} height={8.6 * u} viewBox="0 0 48 37">
       <defs>
-        <linearGradient id="chipGold" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#F3DE9A" />
-          <stop offset="0.5" stopColor="#C9A44E" />
-          <stop offset="1" stopColor="#E9CF82" />
+        <linearGradient id={id} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor={silver ? '#F2F2F4' : '#F3DE9A'} />
+          <stop offset="0.5" stopColor={silver ? '#A9ACB3' : '#C9A44E'} />
+          <stop offset="1" stopColor={silver ? '#DCDDE1' : '#E9CF82'} />
         </linearGradient>
       </defs>
-      <rect x="0.5" y="0.5" width="47" height="36" rx="6" fill="url(#chipGold)" stroke="#9C7C32" strokeWidth="0.8" />
-      <g stroke="#8E6F2A" strokeWidth="0.9" fill="none" opacity="0.75">
+      <rect x="0.5" y="0.5" width="47" height="36" rx="6" fill={`url(#${id})`} stroke={silver ? '#7C7F86' : '#9C7C32'} strokeWidth="0.8" />
+      <g stroke={silver ? '#6F727A' : '#8E6F2A'} strokeWidth="0.9" fill="none" opacity="0.75">
         <path d="M0 12h15M0 25h15M33 12h15M33 25h15M15 0v37M33 0v37" />
         <rect x="15" y="9" width="18" height="19" rx="3" />
       </g>
@@ -262,6 +499,10 @@ export function CardFront({ card, holder, w }: { card: PremiumCard; holder: stri
   const u = w / 100; // 1 unit = 1% of card width
   const dark = isDark(card);
   const { Logo, Art } = card;
+  if (card.brand === 'Apple Card') return <AppleFront card={card} holder={holder} u={u} />;
+  if (card.brand === 'X Money') return <XFront card={card} holder={holder} u={u} />;
+  if (card.brand === 'Visa Platinum') return <VisaPlatinumFront card={card} holder={holder} u={u} />;
+  if (card.brand === 'Mastercard World Elite') return <WorldEliteFront card={card} holder={holder} u={u} />;
   return (
     <div className="absolute inset-0" style={{ background: card.bg, fontFamily: sans }}>
       {Art && <Art u={u} ink={card.ink} />}
@@ -319,6 +560,52 @@ export function CardFront({ card, holder, w }: { card: PremiumCard; holder: stri
 
 // ---------- back ----------
 
+// Apple Card back (matched to the photo): plain white, silver "Goldman Sachs"
+// top-left, outline Mastercard circles + "mastercard" top-right, light silver
+// stripe across the bottom. No number, name or signature panel.
+const silverText: React.CSSProperties = {
+  backgroundImage: 'linear-gradient(180deg, #D9DADD 0%, #8F9298 55%, #B8BABF 100%)',
+  WebkitBackgroundClip: 'text',
+  backgroundClip: 'text',
+  color: 'transparent',
+  filter: 'drop-shadow(0 0.5px 0 rgba(255,255,255,0.9))',
+};
+
+function AppleBack({ card, u }: { card: PremiumCard; u: number }) {
+  return (
+    <div className="absolute inset-0" style={{ background: card.bg }}>
+      <div className="absolute" style={{ left: 7.8 * u, top: 7 * u, fontFamily: serif, fontWeight: 600, fontSize: 4.9 * u, lineHeight: 0.92, ...silverText }}>
+        Goldman
+        <br />
+        Sachs
+      </div>
+      <div className="absolute flex flex-col items-center" style={{ right: 6.5 * u, top: 6.3 * u }}>
+        <svg width={20.6 * u} height={12.9 * u} viewBox="0 0 48 30" fill="none">
+          <defs>
+            <linearGradient id="appleMcSilver" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stopColor="#E4E5E8" />
+              <stop offset="0.5" stopColor="#9DA0A6" />
+              <stop offset="1" stopColor="#CDCFD3" />
+            </linearGradient>
+          </defs>
+          <circle cx="17" cy="15" r="13.6" stroke="url(#appleMcSilver)" strokeWidth="0.9" />
+          <circle cx="31" cy="15" r="13.6" stroke="url(#appleMcSilver)" strokeWidth="0.9" />
+        </svg>
+        <span style={{ fontFamily: sans, fontWeight: 500, fontSize: 3 * u, lineHeight: 1, marginTop: 0.6 * u, ...silverText }}>mastercard</span>
+      </div>
+      {/* light silver stripe, flush with the bottom edge */}
+      <div
+        className="absolute left-0 right-0 bottom-0"
+        style={{
+          height: '23%',
+          backgroundImage: 'linear-gradient(180deg, #D3D4D8 0%, #C6C8CC 40%, #D8D9DC 100%), linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0))',
+          boxShadow: 'inset 0 1px 0 rgba(0,0,0,0.06)',
+        }}
+      />
+    </div>
+  );
+}
+
 export function CardBack({
   card,
   holder,
@@ -332,6 +619,7 @@ export function CardBack({
 }) {
   const u = w / 100;
   const v = h / 100;
+  if (card.brand === 'Apple Card') return <AppleBack card={card} u={u} />;
   const dark = isDark(card);
   const text = etch(card.ink, dark);
   return (
