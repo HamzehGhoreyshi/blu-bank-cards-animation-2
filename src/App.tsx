@@ -1,134 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Particles from './Particles';
-
-// Official Blu Junior card designs (cut from the artwork on jr.blubank.com),
-// turned a quarter turn so they fill the landscape card: chip top-left, blu Junior bottom-right.
-const CARD_IMAGES = [
-  '/cards/astronaut.jpg',
-  '/cards/game.jpg',
-  '/cards/unicorn.jpg',
-  '/cards/footballer.jpg',
-  '/cards/doodle.jpg',
-  '/cards/racing-car.jpg',
-  '/cards/hills.jpg',
-];
-
-// Nine beautiful premium solid colors to clearly track the cards
-const CARD_COLORS = [
-  '#FF3B30', // Apple Red
-  '#FF9500', // Apple Orange
-  '#FFCC00', // Apple Yellow
-  '#34C759', // Apple Green
-  '#007AFF', // Apple Blue
-  '#5856D6', // Apple Purple
-  '#FF2D55', // Apple Pink
-  '#AF52DE', // Apple Violet
-  '#00C7BE', // Apple Teal
-];
-void CARD_COLORS;
-
-// Card backs, one per design (same order as CARD_IMAGES). Modelled on the real
-// Saman Bank back: solid colour taken from the front artwork, dark magnetic stripe,
-// the number in four groups, EXP + CVV2, Saman Bank mark at the bottom.
-// `ink` = text colour that reads on that background. Numbers are made up.
-const CARD_BACKS = [
-  { color: '#2F2A6E', ink: '#FFFFFF' }, // astronaut: night-sky purple
-  { color: '#F4E6C8', ink: '#2E2A26' }, // game: poster cream
-  { color: '#9C9CDA', ink: '#25233F' }, // unicorn: lavender
-  { color: '#F5844A', ink: '#FFFFFF' }, // footballer: orange
-  { color: '#F898C8', ink: '#2F2F33' }, // doodle: pink
-  { color: '#232326', ink: '#FFFFFF' }, // racing car: black
-  { color: '#3F7A68', ink: '#FFFFFF' }, // hills: deep green
-];
-
-// Random card details, made fresh on every page load.
-// Number: Saman's 6219 86 prefix + random digits, with a valid Luhn check digit
-// (the checksum real card numbers use). EXP is a Persian-calendar date.
-const FIRST_NAMES = ['آرین', 'کیان', 'آوا', 'نیکا', 'هلیا', 'رادین', 'سارینا', 'آرتین', 'باران', 'پرهام', 'ترانه', 'دانیال', 'روشا', 'سام', 'مهرسا', 'یاسمن', 'کوروش', 'آیلین', 'بردیا', 'نازنین'];
-const LAST_NAMES = ['محمدی', 'رضایی', 'احمدی', 'کریمی', 'حسینی', 'موسوی', 'جعفری', 'صادقی', 'طاهری', 'نوری', 'کاظمی', 'رحیمی', 'شریفی', 'تهرانی', 'اکبری', 'امیری', 'فرهادی', 'سلطانی'];
-
-const randInt = (min: number, max: number) => min + Math.floor(Math.random() * (max - min + 1));
-const pickOne = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
-
-function randomCardNumber(): string {
-  const digits = '621986'.split('').map(Number);
-  while (digits.length < 15) digits.push(randInt(0, 9));
-  // Luhn check digit
-  let sum = 0;
-  for (let k = 0; k < 15; k++) {
-    let d = digits[14 - k];
-    if (k % 2 === 0) { d *= 2; if (d > 9) d -= 9; }
-    sum += d;
-  }
-  digits.push((10 - (sum % 10)) % 10);
-  return digits.join('').replace(/(\d{4})(?=\d)/g, '$1 ');
-}
-
-function randomHolder() {
-  return {
-    name: `${pickOne(FIRST_NAMES)} ${pickOne(LAST_NAMES)}`,
-    number: randomCardNumber(),
-    exp: `${randInt(1405, 1410)}/${String(randInt(1, 12)).padStart(2, '0')}`,
-    cvv: String(randInt(100, 999)),
-  };
-}
-
-// The official Saman Bank logo (public/brand/saman-logo.png, 343 × 111, from sb24.ir).
-// We show two parts of it as masks, so they take the card's ink colour:
-// the English wordmark and the flower. Boxes measured from the file's pixels.
-const SAMAN = {
-  url: '/brand/saman-logo.png',
-  w: 343,
-  h: 111,
-  word: { x: 46, y: 84, w: 209, h: 27 },
-  flower: { x: 268, y: 0, w: 75, h: 75 },
-};
-
-function maskStyle(part: { x: number; y: number; w: number; h: number }, width: number): React.CSSProperties {
-  const k = width / part.w; // px per logo pixel
-  const size = `${SAMAN.w * k}px ${SAMAN.h * k}px`;
-  const pos = `${-part.x * k}px ${-part.y * k}px`;
-  return {
-    width: `${width}px`,
-    height: `${part.h * k}px`,
-    WebkitMaskImage: `url(${SAMAN.url})`,
-    maskImage: `url(${SAMAN.url})`,
-    WebkitMaskSize: size,
-    maskSize: size,
-    WebkitMaskPosition: pos,
-    maskPosition: pos,
-    WebkitMaskRepeat: 'no-repeat',
-    maskRepeat: 'no-repeat',
-  };
-}
-
-// "Saman Bank" + flower, in the card's ink. The flower keeps the petal shading of
-// the original (greyscale copy blended over the ink), like the printed card.
-function SamanMark({ ink, wordW, flowerW, gap }: { ink: string; wordW: number; flowerW: number; gap: number }) {
-  const k = flowerW / SAMAN.flower.w;
-  return (
-    <div className="flex items-center" style={{ gap: `${gap}px` }}>
-      <div style={{ ...maskStyle(SAMAN.word, wordW), backgroundColor: ink }} />
-      <div style={{ ...maskStyle(SAMAN.flower, flowerW), backgroundColor: ink, position: 'relative' }}>
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage: `url(${SAMAN.url})`,
-            backgroundSize: `${SAMAN.w * k}px ${SAMAN.h * k}px`,
-            backgroundPosition: `${-SAMAN.flower.x * k}px 0px`,
-            filter: 'grayscale(1) contrast(1.3)',
-            mixBlendMode: 'soft-light',
-          }}
-        />
-      </div>
-    </div>
-  );
-}
+import { CARDS, CardFront, CardBack, randomHolder } from './cards';
 
 export default function App() {
-  const cardCount = CARD_IMAGES.length;
+  const cardCount = CARDS.length;
   // One random holder per card, picked once when the page loads.
-  const [holders] = useState(() => CARD_IMAGES.map(() => randomHolder()));
+  const [holders] = useState(() => CARDS.map((c) => randomHolder(c.network)));
   const cardsRefs = useRef<(HTMLDivElement | null)[]>([]);
   const frameId = useRef<number>(0);
 
@@ -500,8 +377,8 @@ export default function App() {
                 const isFrontFace = layerIdx === thicknessLayers.length - 1;
                 const isBackFace = layerIdx === 0;
 
-                const imageSrc = CARD_IMAGES[i];
-                const back = { ...CARD_BACKS[i % CARD_BACKS.length], ...holders[i] };
+                const card = CARDS[i];
+                const back = card;
                 const softShadow = '0 22px 38px -16px rgba(40, 36, 80, 0.45), 0 6px 12px -6px rgba(40, 36, 80, 0.25)';
 
                 // Edge slices
@@ -521,7 +398,7 @@ export default function App() {
                   );
                 }
 
-                // Front face: the Blu Junior artwork (it carries its own chip and logo)
+                // Front face: bank logo, product name, chip, holder name, card network
                 if (isFrontFace) {
                   return (
                     <div
@@ -534,26 +411,14 @@ export default function App() {
                         boxShadow: softShadow,
                       }}
                     >
-                      <img
-                        src={imageSrc}
-                        alt=""
-                        draggable={false}
-                        className="absolute inset-0 w-full h-full object-cover rounded-[16px]"
-                        style={{ transform: 'scale(1.012)' }}
-                      />
+                      <CardFront card={card} holder={holders[i].name} w={metrics.cardW} />
                       <Surface />
                     </div>
                   );
                 }
 
-                // Back face, modelled on the real Saman Bank card back.
+                // Back face: magnetic stripe, signature panel + CVV, number, name, expiry
                 if (isBackFace) {
-                  // Designed portrait (like the real card), then turned the same quarter
-                  // turn as the front artwork: portrait top → the card's left edge.
-                  const pw = metrics.cardH; // portrait width
-                  const ph = metrics.cardW; // portrait height
-                  const u = pw / 100; // 1 unit = 1% of portrait width
-                  const v = ph / 100; // 1 unit = 1% of portrait height
                   return (
                     <div
                       key={layerIdx}
@@ -565,118 +430,7 @@ export default function App() {
                         boxShadow: softShadow,
                       }}
                     >
-                      <div
-                        className="absolute"
-                        style={{
-                          width: `${pw}px`,
-                          height: `${ph}px`,
-                          left: `${(metrics.cardW - pw) / 2}px`,
-                          top: `${(metrics.cardH - ph) / 2}px`,
-                          transform: 'rotate(-90deg)',
-                          color: back.ink,
-                          fontFamily: '"Montserrat", system-ui, sans-serif',
-                          // printed plastic: soft light falloff from the top
-                          backgroundImage:
-                            'radial-gradient(120% 80% at 70% 0%, rgba(255,255,255,0.16), rgba(255,255,255,0) 60%), linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.06))',
-                        }}
-                      >
-                        {/* Magnetic stripe: dark brushed band down the left side */}
-                        <div
-                          className="absolute top-0 bottom-0"
-                          style={{
-                            left: `${4 * u}px`,
-                            width: `${26 * u}px`,
-                            backgroundColor: '#272325',
-                            backgroundImage:
-                              'repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, rgba(0,0,0,0) 1px 3px), linear-gradient(90deg, #1E1B1D 0%, #36302F 45%, #2A2527 70%, #1F1C1E 100%)',
-                            boxShadow: 'inset 0 0 0 0.5px rgba(255,255,255,0.06)',
-                          }}
-                        />
-
-                        {/* Card number: four groups, light weight */}
-                        <div
-                          className="absolute"
-                          style={{
-                            left: `${40 * u}px`,
-                            top: '45%', // a little above the middle of the card's length
-                            transform: 'translateY(-50%)',
-                            fontSize: `${8.6 * u}px`,
-                            lineHeight: 1.5,
-                            fontWeight: 300,
-                            letterSpacing: '0.01em',
-                            fontVariantNumeric: 'tabular-nums',
-                          }}
-                        >
-                          {/* Holder name, near the top of the card, well above the number */}
-                          <div
-                            dir="rtl"
-                            className="absolute whitespace-nowrap"
-                            style={{
-                              left: 0,
-                              bottom: '100%',
-                              marginBottom: `${13 * v}px`, // name sits near the top of the card
-                              fontFamily: '"Vazirmatn", system-ui, sans-serif',
-                              fontSize: `${4.6 * u}px`,
-                              fontWeight: 500,
-                              lineHeight: 1.2,
-                              letterSpacing: 0,
-                              opacity: 0.92,
-                            }}
-                          >
-                            {back.name}
-                          </div>
-                          {back.number.split(' ').map((g, k) => (
-                            <div key={k}>{g}</div>
-                          ))}
-                        </div>
-
-                        {/* EXP and CVV2, two columns */}
-                        {[
-                          { label: 'EXP', value: back.exp, x: 40 },
-                          { label: 'CVV2', value: back.cvv, x: 70.5 },
-                        ].map((f) => (
-                          <div
-                            key={f.label}
-                            className="absolute"
-                            style={{
-                              left: `${f.x * u}px`,
-                              bottom: `${16.5 * v}px`,
-                              fontSize: `${3.7 * u}px`,
-                              lineHeight: 1.35,
-                              fontWeight: 400,
-                              fontVariantNumeric: 'tabular-nums',
-                            }}
-                          >
-                            <div>{f.label}</div>
-                            <div>{f.value}</div>
-                          </div>
-                        ))}
-
-                        {/* Saman Bank mark (official logo) */}
-                        {/* "Powered by" + smaller Saman Bank mark, lined up with the EXP column */}
-                        <div
-                          className="absolute flex items-center"
-                          style={{
-                            left: `${40 * u}px`,
-                            bottom: `${6 * v - 3.5 * u}px`,
-                            gap: `${1.8 * u}px`,
-                            color: back.ink,
-                          }}
-                        >
-                          <span
-                            style={{
-                              fontSize: `${3.1 * u}px`,
-                              fontWeight: 400,
-                              opacity: 0.75,
-                              whiteSpace: 'nowrap',
-                              lineHeight: 1,
-                            }}
-                          >
-                            Powered by
-                          </span>
-                          <SamanMark ink={back.ink} wordW={22 * u} flowerW={7 * u} gap={1.5 * u} />
-                        </div>
-                      </div>
+                      <CardBack card={card} holder={holders[i]} w={metrics.cardW} h={metrics.cardH} />
                       <Surface />
                     </div>
                   );

@@ -2,12 +2,12 @@ import { useEffect, useRef } from 'react';
 
 // Playful background layer, drawn on one <canvas> behind the cards.
 // - Ambient: sparkles, dots, rings, confetti strips, little planets and stars,
-//   drifting slowly and gently twinkling, in the Blu Junior card colours.
+//   drifting slowly and gently twinkling, in the bank card colours.
 //   Each one has a depth, so it shifts with the mouse (parallax).
 // - Click: a burst of confetti from the click point, with gravity and fade.
 // Respects prefers-reduced-motion (fewer, still particles, no bursts).
 
-const COLORS = ['#4E91E6', '#F5844A', '#9C9CDA', '#F898C8', '#FFC94A', '#3F7A68', '#2F2A6E', '#7ED3C4'];
+const COLORS = ['#1B4277', '#DB0011', '#056DAE', '#E31837', '#00AEEF', '#5A84B4', '#0018A8', '#C9A44E'];
 
 type Kind = 'dot' | 'ring' | 'sparkle' | 'confetti' | 'planet' | 'star';
 
