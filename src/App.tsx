@@ -151,8 +151,8 @@ export default function App() {
 
   // Responsive state containing card dimensions
   const [metrics, setMetrics] = useState({
-    cardW: 336,
-    cardH: 211, // 1.59 standard credit card ratio
+    cardW: 211,
+    cardH: 336, // portrait, 1.59 credit card ratio
   });
 
   // Typography metrics to prevent collisions beautifully across all viewports
@@ -200,10 +200,9 @@ export default function App() {
       const heightFactor = Math.min(1.0, Math.max(0.65, h / 850));
       cardW = Math.round(cardW * heightFactor);
 
-      cardW = Math.min(336, Math.max(150, cardW));
-      const cardH = Math.round(cardW / 1.5925); // Standard credit card ratio
-
-      setMetrics({ cardW, cardH });
+      // Long side of the card, then stood upright (portrait): width = short side.
+      const longSide = Math.min(336, Math.max(150, cardW));
+      setMetrics({ cardW: Math.round(longSide / 1.5925), cardH: longSide });
 
       // 2. Calculate Typography Metrics (shrink font sizes aggressively if height or width is small)
       const isMobile = w < 640;
@@ -550,10 +549,9 @@ export default function App() {
 
                 // Back face, modelled on the real Saman Bank card back.
                 if (isBackFace) {
-                  // Designed portrait (like the real card), then turned the same quarter
-                  // turn as the front artwork: portrait top → the card's left edge.
-                  const pw = metrics.cardH; // portrait width
-                  const ph = metrics.cardW; // portrait height
+                  // Portrait, like the real card (cards now stand upright).
+                  const pw = metrics.cardW; // portrait width
+                  const ph = metrics.cardH; // portrait height
                   const u = pw / 100; // 1 unit = 1% of portrait width
                   const v = ph / 100; // 1 unit = 1% of portrait height
                   return (
@@ -572,9 +570,8 @@ export default function App() {
                         style={{
                           width: `${pw}px`,
                           height: `${ph}px`,
-                          left: `${(metrics.cardW - pw) / 2}px`,
-                          top: `${(metrics.cardH - ph) / 2}px`,
-                          transform: 'rotate(-90deg)',
+                          left: 0,
+                          top: 0,
                           color: back.ink,
                           fontFamily: '"Montserrat", system-ui, sans-serif',
                           // printed plastic: soft light falloff from the top
