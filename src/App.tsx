@@ -256,8 +256,8 @@ export default function App() {
     mouse.current.y += (mouse.current.targetY - mouse.current.y) * 0.08;
 
     const cards = cardsRefs.current;
-    const h = window.innerHeight;
-    const { cardH } = metrics;
+    const w = window.innerWidth;
+    const { cardW } = metrics;
 
     let virtualActiveIndex: number;
     if (jump.current) {
@@ -313,10 +313,11 @@ export default function App() {
       // one gap G so the card two places away just reaches past the screen edge;
       // on short screens G never drops below 56 px.
       const s0 = D / (D - 400), s1 = D / (D - 220), s2 = D / (D + 60);
-      const hh0 = (cardH / 2) * s0;
-      const hh1 = (cardH / 2) * Math.abs(Math.cos((132 * Math.PI) / 180)) * s1;
-      const hh2 = (cardH / 2) * Math.abs(Math.cos((175 * Math.PI) / 180)) * s2;
-      const G = Math.max(56, (h / 2 - peekAmount - hh0 - 2 * hh1 - 2 * hh2) / 2);
+      // Horizontal layout: the same maths on the card's half-width across the screen width.
+      const hh0 = (cardW / 2) * s0;
+      const hh1 = (cardW / 2) * Math.abs(Math.cos((132 * Math.PI) / 180)) * s1;
+      const hh2 = (cardW / 2) * Math.abs(Math.cos((175 * Math.PI) / 180)) * s2;
+      const G = Math.max(40, (w / 2 - peekAmount - hh0 - 2 * hh1 - 2 * hh2) / 2);
       const Y1 = (hh0 + G + hh1) / s1; // resting spot of offset 1 (before perspective)
       const Y2 = (hh0 + 2 * G + 2 * hh1 + hh2) / s2; // resting spot of offset 2
 
@@ -330,7 +331,7 @@ export default function App() {
         const easedT = t * t * (3 - 2 * t);
 
         // Y moves from 0 to (cardH + gap)
-        y = -sign * (easedT * Y1);
+        y = sign * (easedT * Y1);
 
         // Z moves from 400 (center) to 220 (adjacent)
         z = 400 + easedT * (220 - 400);
@@ -355,7 +356,7 @@ export default function App() {
         const yEnd = Y2;
 
         const currentY = yStart + easedT * (yEnd - yStart);
-        y = -sign * currentY;
+        y = sign * currentY;
 
         z = zStart + easedT * (zEnd - zStart);
         rot = rotStart + easedT * (rotEnd - rotStart);
@@ -377,10 +378,10 @@ export default function App() {
         // Calculate yEnd3 dynamically so that the card's edge is completely 100px past the screen boundary
         const sEnd3 = D / (D - zEnd3);
         // fully off-screen, and at least one more even step out
-        const yEnd3 = Math.max((h / 2 + 100) / sEnd3 + cardH / 2, Y2 + (Y2 - Y1));
+        const yEnd3 = Math.max((w / 2 + 100) / sEnd3 + cardW / 2, Y2 + (Y2 - Y1));
 
         const currentY = yEnd2 + easedT * (yEnd3 - yEnd2);
-        y = -sign * currentY;
+        y = sign * currentY;
 
         z = zStart + easedT * (zEnd3 - zStart);
         rot = rotStart + easedT * (rotEnd3 - rotStart);
@@ -398,8 +399,9 @@ export default function App() {
       const activeTiltX = -mouse.current.y * maxTiltX * centerFactor;
       const activeTiltY = mouse.current.x * maxTiltY * centerFactor;
 
-      const totalRotX = localCardRotation + activeTiltX;
-      const totalRotY = activeTiltY;
+      // Cards roll around the vertical (Y) axis as they slide sideways
+      const totalRotX = activeTiltX;
+      const totalRotY = localCardRotation + activeTiltY;
 
       // Depth z-index layer
       card.style.zIndex = Math.round(z).toString();
@@ -408,13 +410,13 @@ export default function App() {
       // Lighting, read by the faces through CSS variables:
       // --gx  where the glossy streak sits (follows tilt and the roll of the card)
       // --shade how much a face darkens as it turns away from the viewer
-      const facing = Math.abs(Math.cos((totalRotX * Math.PI) / 180)) * Math.cos((totalRotY * Math.PI) / 180);
-      const gx = 50 + totalRotY * 3.2 + Math.sin((totalRotX * Math.PI) / 180) * 45;
+      const facing = Math.abs(Math.cos((totalRotY * Math.PI) / 180)) * Math.cos((totalRotX * Math.PI) / 180);
+      const gx = 50 + activeTiltY * 3.2 + Math.sin((totalRotY * Math.PI) / 180) * 45;
       card.style.setProperty('--gx', `${gx.toFixed(1)}%`);
       card.style.setProperty('--shade', ((1 - facing) * 0.5).toFixed(3));
 
       // Inject translation matrix with the premium -3deg tilt combined with dynamic mouse-interactive 3D tilt
-      card.style.transform = `translateY(${y.toFixed(2)}px) translateZ(${z.toFixed(2)}px) rotateX(${totalRotX.toFixed(2)}deg) rotateY(${totalRotY.toFixed(2)}deg) rotateZ(-3deg)`;
+      card.style.transform = `translateX(${y.toFixed(2)}px) translateZ(${z.toFixed(2)}px) rotateY(${totalRotY.toFixed(2)}deg) rotateX(${totalRotX.toFixed(2)}deg) rotateZ(-3deg)`;
     }
   };
 
@@ -560,7 +562,7 @@ export default function App() {
                       className="absolute inset-0 rounded-[16px] pointer-events-none overflow-hidden"
                       style={{
                         backgroundColor: back.color,
-                        transform: `translateZ(${zOffset}px) rotateX(180deg)`,
+                        transform: `translateZ(${zOffset}px) rotateY(180deg)`,
                         backfaceVisibility: 'hidden',
                         boxShadow: softShadow,
                       }}
